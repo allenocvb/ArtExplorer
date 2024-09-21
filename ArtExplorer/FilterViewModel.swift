@@ -31,6 +31,7 @@ class FilterViewModel: ObservableObject {
     @Published var cultures: [String] = ["Any"]
     
     @Published var appliedFilters: (culture: String, century: String, classification: String, isRandom: Bool) = ("Any", "Any", "Any", false)
+    @Published var filtersChanged = false
     
     private var cancellables = Set<AnyCancellable>()
     private let apiKey = "316f062f-548c-4bf9-b3a4-f958c902cbe8"
@@ -46,14 +47,18 @@ class FilterViewModel: ObservableObject {
         fetchCultures()
     }
     
-
     func applyFilters(culture: String, century: String, classification: String, isRandom: Bool) {
-            print("Applying filters: culture: \(culture), century: \(century), classification: \(classification), isRandom: \(isRandom)")
-            appliedFilters = (culture, century, classification, isRandom)
-        }
+        print("Applying filters: culture: \(culture), century: \(century), classification: \(classification), isRandom: \(isRandom)")
+        appliedFilters = (culture, century, classification, isRandom)
+        updateFilters()
+    }
+    
+    func updateFilters() {
+        filtersChanged.toggle()
+    }
     
     private func fetchCultures() {
-        let urlString = "https://api.harvardartmuseums.org/culture?apikey=\(apiKey)&size=200"
+        let urlString = "https://api.harvardartmuseums.org/culture?apikey=\(apiKey)&size=500"
         
         guard let url = URL(string: urlString) else {
             print("Invalid URL")

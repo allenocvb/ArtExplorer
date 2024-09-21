@@ -13,10 +13,10 @@ struct ArtworksResponse: Codable {
 }
 
 struct Info: Codable {
-    let totalrecordsperquery: Int
-    let totalrecords: Int
-    let pages: Int
-    let page: Int
+    let totalrecordsperquery: Int?
+    let totalrecords: Int?
+    let pages: Int?
+    let page: Int?
 }
 
 struct Artwork: Codable, Identifiable {
@@ -36,12 +36,12 @@ struct Artwork: Codable, Identifiable {
     let people: [ArtistInfo]?
     let department: String?
     let places: [Place]?
-    
+
     var imageUrl: URL? {
         guard let urlString = primaryimageurl else { return nil }
         return URL(string: urlString)
     }
-    
+
     var fullDescription: String {
         [description, labeltext, commentary].compactMap { $0 }.joined(separator: "\n\n")
     }
@@ -53,18 +53,33 @@ struct ArtworkImage: Codable {
 }
 
 struct ArtistInfo: Codable {
-    let name: String
-    let role: String
+    let name: String?
+    let role: String?
 }
 
 struct Place: Codable {
-    let displayname: String
-    let confidence: String?
-    let placeid: Int
-    let type: String
+    let id: Int?
+    let name: String?
+    let type: String?
+    let centroid: Centroid?
+
+    enum CodingKeys: String, CodingKey {
+        case id = "placeid"
+        case name = "displayname"
+        case type
+        case centroid
+    }
 }
 
-// Remove the GeoCoordinate struct as it's no longer needed
+struct Centroid: Codable {
+    let latitude: Double?
+    let longitude: Double?
+}
+
+struct PlaceResponse: Codable {
+    let info: Info?
+    let records: [Place]?
+}
 
 extension Artwork {
     static var sampleArtwork: Artwork {
@@ -72,7 +87,7 @@ extension Artwork {
             id: 1,
             title: "Sample Artwork",
             description: "This is a sample artwork description.",
-            primaryimageurl: "https://example.com/sample.jpg",
+            primaryimageurl: "https://nrs.harvard.edu/urn-3:HUAM:DDC25105_dynmc",
             labeltext: "Sample label text",
             commentary: "Sample commentary about the artwork",
             period: "Modern",
@@ -83,8 +98,8 @@ extension Artwork {
             dated: "2024",
             images: [
                 ArtworkImage(
-                    baseimageurl: "https://example.com/sample.jpg",
-                    iiifbaseuri: "https://example.com/iiif/sample"
+                    baseimageurl: "https://nrs.harvard.edu/urn-3:HUAM:DDC25105_dynmc",
+                    iiifbaseuri: "https://ids.lib.harvard.edu/ids/iiif/18483392"
                 )
             ],
             people: [
@@ -93,8 +108,14 @@ extension Artwork {
             ],
             department: "Modern and Contemporary Art",
             places: [
-                Place(displayname: "Sample Place", confidence: nil, placeid: 1, type: "Creation Place")
+                Place(
+                    id: 2028190,
+                    name: "Boston, Massachusetts, United States",
+                    type: "Creation Place",
+                    centroid: Centroid(latitude: 42.3601, longitude: -71.0589)
+                )
             ]
         )
     }
 }
+

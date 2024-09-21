@@ -14,18 +14,19 @@ struct ContentView: View {
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var showingFilters = false
+    @State private var previousFilters: (culture: String, century: String, classification: String, isRandom: Bool)?
     
     var body: some View {
         NavigationView {
-            VStack {
-                if isLoading {
-                    ProgressView("Loading...")
-                } else if let errorMessage = errorMessage {
-                    Text("Error: \(errorMessage)")
-                } else if artworks.isEmpty {
-                    Text("No artworks found.")
-                } else {
-                    List {
+            ScrollView {
+                LazyVStack(spacing: 20) {
+                    if isLoading {
+                        ProgressView("Loading...")
+                    } else if let errorMessage = errorMessage {
+                        Text("Error: \(errorMessage)")
+                    } else if artworks.isEmpty {
+                        Text("No artworks found.")
+                    } else {
                         ForEach(artworks) { artwork in
                             NavigationLink(destination: ArtworkDetailView(artwork: artwork)) {
                                 ArtworkRow(artwork: artwork)
@@ -33,6 +34,7 @@ struct ContentView: View {
                         }
                     }
                 }
+                .padding()
             }
             .navigationTitle("Art Explorer")
             .toolbar {
@@ -44,14 +46,28 @@ struct ContentView: View {
                 FilterView(viewModel: filterViewModel, isPresented: $showingFilters)
             }
             .onAppear {
-                fetchArtworks()
+                if previousFilters == nil {
+                    previousFilters = filterViewModel.appliedFilters
+                    fetchArtworks()
+                }
+            }
+            .onChange(of: filterViewModel.filtersChanged) { _ in
+                let newFilters = filterViewModel.appliedFilters
+                if !areFiltersEqual(previousFilters, newFilters) {
+                    previousFilters = newFilters
+                    fetchArtworks()
+                }
             }
         }
-        .onReceive(filterViewModel.$selectedCulture) { _ in fetchArtworks() }
-        .onReceive(filterViewModel.$selectedCentury) { _ in fetchArtworks() }
-        .onReceive(filterViewModel.$selectedClassification) { _ in fetchArtworks() }
-        .onReceive(filterViewModel.$isRandom) { _ in fetchArtworks() }
-        .onReceive(filterViewModel.$appliedFilters) { _ in fetchArtworks() }
+    }
+    
+    private func areFiltersEqual(_ lhs: (culture: String, century: String, classification: String, isRandom: Bool)?,
+                                 _ rhs: (culture: String, century: String, classification: String, isRandom: Bool)) -> Bool {
+        guard let lhs = lhs else { return false }
+        return lhs.culture == rhs.culture &&
+               lhs.century == rhs.century &&
+               lhs.classification == rhs.classification &&
+               lhs.isRandom == rhs.isRandom
     }
     
     private func fetchArtworks() {
@@ -60,28 +76,47 @@ struct ContentView: View {
         
         let apiKey = "316f062f-548c-4bf9-b3a4-f958c902cbe8"
         
-        var urlString = "https://api.harvardartmuseums.org/object?apikey=\(apiKey)&size=50&fields=id,title,description,primaryimageurl,images,culture,classification,dated,period,medium,technique,department,people,places"
+        var urlString = "https://api.harvardartmuseums.org/object?apikey=\(apiKey)&size=100&fields=id,title,description,primaryimageurl,images,culture,classification,dated,period,medium,technique,department,people,places"
         
         let (culture, century, classification, isRandom) = filterViewModel.appliedFilters
         
-        if culture != "Any" {
-            urlString += "&culture=\(culture)"
+        if !urlString.contains("sort=") {
+            urlString += "&sort=random"
         }
+        
+        if culture == "Any" {
+            // When 'Any' is selected, explicitly request a mix of cultures
+            let popularCultures = ["American", "Chinese", "European", "Greek", "Roman", "Egyptian", "Japanese", "Indian"]
+            let culturesToInclude = popularCultures.prefix(5).joined(separator: "|")
+            urlString += "&culture=\(culturesToInclude)"
+        } else {
+            let encodedCulture = culture.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? culture
+            urlString += "&culture=\(encodedCulture)"
+        }
+        
         if century != "Any" {
-            urlString += "&century=\(century)"
+            let encodedCentury = century.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? century
+            urlString += "&century=\(encodedCentury)"
         }
+        
         if classification != "Any" {
-            urlString += "&classification=\(classification)"
+            let encodedClassification = classification.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? classification
+            urlString += "&classification=\(encodedClassification)"
         }
+        
         if isRandom {
             urlString += "&sort=random"
         }
         
         guard let url = URL(string: urlString) else {
-            errorMessage = "Invalid URL"
-            isLoading = false
+            DispatchQueue.main.async {
+                self.errorMessage = "Invalid URL"
+                self.isLoading = false
+            }
             return
         }
+        
+        print("Fetching artworks with URL: \(urlString)")
         
         URLSession.shared.dataTask(with: url) { data, response, error in
             DispatchQueue.main.async {
@@ -90,48 +125,18 @@ struct ContentView: View {
                 if let error = error {
                     self.errorMessage = error.localizedDescription
                 } else if let data = data {
-                    // Print raw JSON data
-                    if let jsonString = String(data: data, encoding: .utf8) {
-                        print("Raw JSON data:")
-                        print(jsonString)
-                    }
-                    
                     do {
                         let artworksResponse = try JSONDecoder().decode(ArtworksResponse.self, from: data)
-                        self.artworks = artworksResponse.records
+                        self.artworks = artworksResponse.records.filter { $0.primaryimageurl != nil }
                         
-                        // After fetching artworks, fetch place details for each
-                        for artwork in self.artworks {
-                            self.fetchPlaceDetails(for: artwork)
-                        }
+                        // Print out the cultures of fetched artworks for debugging
+                        let cultures = self.artworks.compactMap { $0.culture }
+                        print("Fetched artworks cultures: \(cultures)")
+                        
                     } catch {
                         self.errorMessage = "Failed to decode response: \(error.localizedDescription)"
                         print("Decoding error: \(error)")
                     }
-                }
-            }
-        }.resume()
-    }
-    
-    private func fetchPlaceDetails(for artwork: Artwork) {
-        guard let place = artwork.places?.first else {
-            print("Artwork: \(artwork.title) - No location data")
-            return
-        }
-        
-        let apiKey = "316f062f-548c-4bf9-b3a4-f958c902cbe8"
-        let urlString = "https://api.harvardartmuseums.org/place/\(place.placeid)?apikey=\(apiKey)"
-        
-        guard let url = URL(string: urlString) else { return }
-        
-        URLSession.shared.dataTask(with: url) { data, response, error in
-            if let data = data {
-                do {
-                    let placeResponse = try JSONDecoder().decode(Place.self, from: data)
-                    print("Artwork: \(artwork.title)")
-                    print("Location: \(placeResponse.displayname)")
-                } catch {
-                    print("Failed to decode place response: \(error)")
                 }
             }
         }.resume()
@@ -142,26 +147,53 @@ struct ArtworkRow: View {
     let artwork: Artwork
     
     var body: some View {
-        HStack {
-            AsyncImage(url: artwork.imageUrl) { image in
-                image.resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: 50, height: 50)
-                    .clipped()
-            } placeholder: {
-                Color.gray
-                    .frame(width: 50, height: 50)
+        ZStack(alignment: .bottom) {
+            if let imageUrl = artwork.imageUrl {
+                AsyncImage(url: imageUrl) { phase in
+                    switch phase {
+                    case .empty:
+                        ProgressView()
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    case .failure:
+                        Image(systemName: "photo")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .foregroundColor(.gray)
+                    @unknown default:
+                        Color.gray
+                    }
+                }
+                .frame(height: 200)
+                .clipped()
+            } else {
+                Image(systemName: "photo")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .foregroundColor(.gray)
+                    .frame(height: 200)
             }
             
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(artwork.title)
                     .font(.headline)
+                    .lineLimit(2)
                 if let culture = artwork.culture {
                     Text(culture)
                         .font(.subheadline)
+                        .lineLimit(1)
                 }
             }
+            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.black.opacity(0.7))
+            .foregroundColor(.white)
         }
+        .frame(height: 200)
+        .cornerRadius(10)
+        .shadow(radius: 5)
     }
 }
 
