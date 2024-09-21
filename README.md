@@ -1,5 +1,5 @@
 # ArtExplorer
-![Screenshot 2024-09-21 at 4 35 21 PM](https://github.com/user-attachments/assets/4fef4e93-f70d-4cc7-968f-b690c5ab6463)
+<img src="https://github.com/user-attachments/assets/4fef4e93-f70d-4cc7-968f-b690c5ab6463" width="100" alt="ArtExplorer Screenshot">
 
 ## Demo
 
