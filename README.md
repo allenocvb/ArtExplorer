@@ -1,8 +1,12 @@
 # ArtExplorer
 <img src="https://github.com/user-attachments/assets/4fef4e93-f70d-4cc7-968f-b690c5ab6463" width="100" alt="ArtExplorer Screenshot">
+
 ![Screenshot 2024-09-21 at 5 15 26 PM](https://github.com/user-attachments/assets/4ca5785e-1aa4-4292-8a88-30754b60db7a)
+
 ![Screenshot 2024-09-21 at 5 17 51 PM](https://github.com/user-attachments/assets/8a2ee619-cdeb-47d7-b89c-bd99f6cb751a)
+
 ![Screenshot 2024-09-21 at 5 18 20 PM](https://github.com/user-attachments/assets/687f9bab-6175-47e7-aaec-c351754178d1)
+
 ![Screenshot 2024-09-21 at 5 19 11 PM](https://github.com/user-attachments/assets/3a5cf7fe-a5bd-453f-9f82-c2ff278b4ce5)
 
 
