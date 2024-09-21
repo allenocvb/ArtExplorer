@@ -6,17 +6,15 @@
 //
 
 import SwiftUI
+import Combine
 
 struct ContentView: View {
+    @StateObject private var filterViewModel = FilterViewModel()
     @State private var artworks: [Artwork] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var showingFilters = false
-    @State private var culture = "Any"
-    @State private var century = "Any"
-    @State private var classification = "Any"
-    @State private var isRandom = false
-
+    
     var body: some View {
         NavigationView {
             VStack {
@@ -43,29 +41,28 @@ struct ContentView: View {
                 }
             }
             .sheet(isPresented: $showingFilters) {
-                FilterView(isPresented: $showingFilters, applyFilters: applyFilters)
+                FilterView(viewModel: filterViewModel, isPresented: $showingFilters)
             }
             .onAppear {
                 fetchArtworks()
             }
         }
+        .onReceive(filterViewModel.$selectedCulture) { _ in fetchArtworks() }
+        .onReceive(filterViewModel.$selectedCentury) { _ in fetchArtworks() }
+        .onReceive(filterViewModel.$selectedClassification) { _ in fetchArtworks() }
+        .onReceive(filterViewModel.$isRandom) { _ in fetchArtworks() }
+        .onReceive(filterViewModel.$appliedFilters) { _ in fetchArtworks() }
     }
-
-    private func applyFilters(culture: String, century: String, classification: String, isRandom: Bool) {
-        self.culture = culture
-        self.century = century
-        self.classification = classification
-        self.isRandom = isRandom
-        fetchArtworks()
-    }
-
-    private func fetchArtworks(retryCount: Int = 3) {
+    
+    private func fetchArtworks() {
         isLoading = true
         errorMessage = nil
         
         let apiKey = "316f062f-548c-4bf9-b3a4-f958c902cbe8"
         
-        var urlString = "https://api.harvardartmuseums.org/object?apikey=\(apiKey)&size=50"
+        var urlString = "https://api.harvardartmuseums.org/object?apikey=\(apiKey)&size=50&fields=id,title,description,primaryimageurl,images,culture,classification,dated,period,medium,technique,department,people,places"
+        
+        let (culture, century, classification, isRandom) = filterViewModel.appliedFilters
         
         if culture != "Any" {
             urlString += "&culture=\(culture)"
@@ -80,48 +77,64 @@ struct ContentView: View {
             urlString += "&sort=random"
         }
         
-        
         guard let url = URL(string: urlString) else {
-                errorMessage = "Invalid URL"
-                isLoading = false
-                return
-            }
-        
-        print("Fetching from URL: \(url.absoluteString)")
+            errorMessage = "Invalid URL"
+            isLoading = false
+            return
+        }
         
         URLSession.shared.dataTask(with: url) { data, response, error in
-                DispatchQueue.main.async {
-                    if let error = error {
-                        print("Error: \(error.localizedDescription)")
-                        if retryCount > 0 {
-                            print("Retrying... (\(retryCount) attempts left)")
-                            self.fetchArtworks(retryCount: retryCount - 1)
-                        } else {
-                            self.isLoading = false
-                            self.errorMessage = error.localizedDescription
+            DispatchQueue.main.async {
+                self.isLoading = false
+                
+                if let error = error {
+                    self.errorMessage = error.localizedDescription
+                } else if let data = data {
+                    // Print raw JSON data
+                    if let jsonString = String(data: data, encoding: .utf8) {
+                        print("Raw JSON data:")
+                        print(jsonString)
+                    }
+                    
+                    do {
+                        let artworksResponse = try JSONDecoder().decode(ArtworksResponse.self, from: data)
+                        self.artworks = artworksResponse.records
+                        
+                        // After fetching artworks, fetch place details for each
+                        for artwork in self.artworks {
+                            self.fetchPlaceDetails(for: artwork)
                         }
-                    } else if let data = data {
-                        do {
-                            let artworksResponse = try JSONDecoder().decode(ArtworksResponse.self, from: data)
-                            self.artworks = artworksResponse.records
-                            self.isLoading = false
-                            print("Fetched \(self.artworks.count) artworks")
-                        } catch {
-                            print("Decoding error: \(error)")
-                            if let responseString = String(data: data, encoding: .utf8) {
-                                print("Raw response: \(responseString)")
-                            }
-                            if retryCount > 0 {
-                                print("Retrying... (\(retryCount) attempts left)")
-                                self.fetchArtworks(retryCount: retryCount - 1)
-                            } else {
-                                self.isLoading = false
-                                self.errorMessage = "Failed to decode response: \(error.localizedDescription)"
-                            }
-                        }
+                    } catch {
+                        self.errorMessage = "Failed to decode response: \(error.localizedDescription)"
+                        print("Decoding error: \(error)")
                     }
                 }
-            }.resume()
+            }
+        }.resume()
+    }
+    
+    private func fetchPlaceDetails(for artwork: Artwork) {
+        guard let place = artwork.places?.first else {
+            print("Artwork: \(artwork.title) - No location data")
+            return
+        }
+        
+        let apiKey = "316f062f-548c-4bf9-b3a4-f958c902cbe8"
+        let urlString = "https://api.harvardartmuseums.org/place/\(place.placeid)?apikey=\(apiKey)"
+        
+        guard let url = URL(string: urlString) else { return }
+        
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            if let data = data {
+                do {
+                    let placeResponse = try JSONDecoder().decode(Place.self, from: data)
+                    print("Artwork: \(artwork.title)")
+                    print("Location: \(placeResponse.displayname)")
+                } catch {
+                    print("Failed to decode place response: \(error)")
+                }
+            }
+        }.resume()
     }
 }
 

@@ -8,54 +8,53 @@
 import SwiftUI
 
 struct FilterView: View {
-    @State private var selectedCulture: String = "Any"
-    @State private var selectedCentury: String = "Any"
-    @State private var selectedClassification: String = "Any"
-    @State private var isRandom: Bool = false
+    @ObservedObject var viewModel: FilterViewModel
     @Binding var isPresented: Bool
-    var applyFilters: (String, String, String, Bool) -> Void
-
-    let cultures = ["Any", "American", "European", "Asian", "African"]
-    let centuries = ["Any", "21st", "20th", "19th", "18th", "17th", "16th"]
-    let classifications = ["Any", "Paintings", "Photographs", "Prints", "Sculpture", "Textile Arts"]
+    
+    let centuries = ["Any", "21st", "20th", "19th", "18th", "17th", "16th", "15th", "14th", "13th", "12th", "11th", "10th"]
+    let classifications = ["Any", "Paintings", "Photographs", "Prints", "Sculpture", "Textile Arts", "Vessels", "Coins", "Jewelry"]
 
     var body: some View {
         NavigationView {
             Form {
-                Picker("Culture", selection: $selectedCulture) {
-                    ForEach(cultures, id: \.self) { culture in
+                Picker("Culture", selection: $viewModel.selectedCulture) {
+                    ForEach(viewModel.cultures, id: \.self) { culture in
                         Text(culture)
                     }
                 }
 
-                Picker("Century", selection: $selectedCentury) {
+                Picker("Century", selection: $viewModel.selectedCentury) {
                     ForEach(centuries, id: \.self) { century in
                         Text(century)
                     }
                 }
 
-                Picker("Classification", selection: $selectedClassification) {
+                Picker("Classification", selection: $viewModel.selectedClassification) {
                     ForEach(classifications, id: \.self) { classification in
                         Text(classification)
                     }
                 }
 
-                Toggle("Random Selection", isOn: $isRandom)
+                Toggle("Random Selection", isOn: $viewModel.isRandom)
 
                 Button("Apply Filters") {
-                    applyFilters(selectedCulture, selectedCentury, selectedClassification, isRandom)
+                    print("Before applying filters - isRandom: \(viewModel.isRandom)")
+                    viewModel.applyFilters(
+                        culture: viewModel.selectedCulture,
+                        century: viewModel.selectedCentury,
+                        classification: viewModel.selectedClassification,
+                        isRandom: viewModel.isRandom
+                    )
                     isPresented = false
                 }
             }
             .navigationTitle("Filter Artworks")
+            .toolbar {
+                Button("Close") {
+                    isPresented = false
+                }
+            }
         }
     }
 }
-
-struct FilterView_Previews: PreviewProvider {
-    static var previews: some View {
-        FilterView(isPresented: .constant(true), applyFilters: { _, _, _, _ in })
-    }
-}
-
 
