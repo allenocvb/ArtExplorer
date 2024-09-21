@@ -6,8 +6,9 @@ Future goals: Improve UI, caching, more personalization
 
 Click the image below to watch a full demo of the ArtExplorer app:
 
-[![ArtExplorer Demo](https://cdn.loom.com/sessions/thumbnails/762dfc3225304c6e8113fc25c47e048d-35a135105782c0b8-full-play.gif)](https://www.loom.com/share/762dfc3225304c6e8113fc25c47e048d)
-
+<a href="https://www.loom.com/share/762dfc3225304c6e8113fc25c47e048d" target="_blank">
+  <img src="https://cdn.loom.com/sessions/thumbnails/762dfc3225304c6e8113fc25c47e048d-35a135105782c0b8-full-play.gif" alt="ArtExplorer Demo">
+</a>
 
 ArtExplorer is an iOS app that allows users to explore and discover artworks from the Harvard Art Museums' collection. The app provides an intuitive interface for browsing artworks, viewing detailed information, and exploring the geographical context of each piece.
 
