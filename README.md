@@ -1,4 +1,12 @@
 # ArtExplorer
+![Screenshot 2024-09-21 at 4 35 21 PM](https://github.com/user-attachments/assets/4fef4e93-f70d-4cc7-968f-b690c5ab6463)
+
+## Demo
+
+Click the image below to watch a full demo of the ArtExplorer app:
+
+[![ArtExplorer Demo](https://cdn.loom.com/sessions/thumbnails/762dfc3225304c6e8113fc25c47e048d-35a135105782c0b8-full-play.gif)](https://www.loom.com/share/762dfc3225304c6e8113fc25c47e048d)
+
 
 ArtExplorer is an iOS app that allows users to explore and discover artworks from the Harvard Art Museums' collection. The app provides an intuitive interface for browsing artworks, viewing detailed information, and exploring the geographical context of each piece.
 
@@ -27,7 +35,7 @@ To run ArtExplorer on your local machine, follow these steps:
 
 2. Clone this repository to your local machine:
    ```
-   git clone https://github.com/yourusername/ArtExplorer.git
+   git clone https://github.com/allenocvb/ArtExplorer.git
    ```
 
 3. Navigate to the project directory:
@@ -92,7 +100,7 @@ Please ensure you do not commit your `Config.swift` file with your personal API 
 
 Allen Odoom - aodoom04@gmail.com
 
-Project Link: [https://github.com/yourusername/ArtExplorer](https://github.com/allenocvb/ArtExplorer)
+Project Link: [https://github.com/allenocvb/ArtExplorer](https://github.com/allenocvb/ArtExplorer)
 
 ## License
 
