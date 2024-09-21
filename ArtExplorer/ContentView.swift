@@ -74,7 +74,7 @@ struct ContentView: View {
         isLoading = true
         errorMessage = nil
         
-        let apiKey = "316f062f-548c-4bf9-b3a4-f958c902cbe8"
+        let apiKey = Config.apiKey
         
         var urlString = "https://api.harvardartmuseums.org/object?apikey=\(apiKey)&size=100&fields=id,title,description,primaryimageurl,images,culture,classification,dated,period,medium,technique,department,people,places"
         

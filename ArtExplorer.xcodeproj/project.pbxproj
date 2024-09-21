@@ -17,6 +17,8 @@
 		AA9A30A42C9E3F8000EE72A1 /* FilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9A30A32C9E3F8000EE72A1 /* FilterView.swift */; };
 		AA9A30A62C9E879E00EE72A1 /* CultureCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9A30A52C9E879E00EE72A1 /* CultureCache.swift */; };
 		AA9A30A82C9E890200EE72A1 /* FilterViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9A30A72C9E890200EE72A1 /* FilterViewModel.swift */; };
+		AA9A30AA2C9F5D4300EE72A1 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9A30A92C9F5D4300EE72A1 /* Config.swift */; };
+		AA9A30AC2C9F5F5A00EE72A1 /* Config.template.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9A30AB2C9F5F5A00EE72A1 /* Config.template.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +33,8 @@
 		AA9A30A32C9E3F8000EE72A1 /* FilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterView.swift; sourceTree = "<group>"; };
 		AA9A30A52C9E879E00EE72A1 /* CultureCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CultureCache.swift; sourceTree = "<group>"; };
 		AA9A30A72C9E890200EE72A1 /* FilterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterViewModel.swift; sourceTree = "<group>"; };
+		AA9A30A92C9F5D4300EE72A1 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
+		AA9A30AB2C9F5F5A00EE72A1 /* Config.template.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.template.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +75,8 @@
 				AA9A30A32C9E3F8000EE72A1 /* FilterView.swift */,
 				AA9A30A52C9E879E00EE72A1 /* CultureCache.swift */,
 				AA9A30A72C9E890200EE72A1 /* FilterViewModel.swift */,
+				AA9A30A92C9F5D4300EE72A1 /* Config.swift */,
+				AA9A30AB2C9F5F5A00EE72A1 /* Config.template.swift */,
 				AA6289152C9E05AC00401302 /* Assets.xcassets */,
 				AA6289172C9E05AC00401302 /* Preview Content */,
 			);
@@ -157,9 +163,11 @@
 			files = (
 				AA6289142C9E05A800401302 /* ContentView.swift in Sources */,
 				AA9A309E2C9E0C9800EE72A1 /* ArtworksResponse.swift in Sources */,
+				AA9A30AA2C9F5D4300EE72A1 /* Config.swift in Sources */,
 				AA9A30A82C9E890200EE72A1 /* FilterViewModel.swift in Sources */,
 				AA9A30A02C9E0EB700EE72A1 /* ArtworkDetailView.swift in Sources */,
 				AA9A30A22C9E381D00EE72A1 /* HomeView.swift in Sources */,
+				AA9A30AC2C9F5F5A00EE72A1 /* Config.template.swift in Sources */,
 				AA9A30A62C9E879E00EE72A1 /* CultureCache.swift in Sources */,
 				AA9A30A42C9E3F8000EE72A1 /* FilterView.swift in Sources */,
 				AA6289122C9E05A800401302 /* ArtExplorerApp.swift in Sources */,

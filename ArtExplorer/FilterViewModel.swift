@@ -34,7 +34,7 @@ class FilterViewModel: ObservableObject {
     @Published var filtersChanged = false
     
     private var cancellables = Set<AnyCancellable>()
-    private let apiKey = "316f062f-548c-4bf9-b3a4-f958c902cbe8"
+    private let apiKey = Config.apiKey
     
     init() {
         Publishers.CombineLatest4($selectedCulture, $selectedCentury, $selectedClassification, $isRandom)
